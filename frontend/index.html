@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Study Assistant - Home</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+</head>
+<body class="home-body">
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fa-solid fa-graduation-cap" style="color: #6c63ff;"></i>
+        <span class="logo-text">Smart Study Assistant</span>
+      </div>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="login.html" class="nav-link btn-login-outline">Login</a>
+        <a href="signup.html" class="nav-link btn-signup">Sign Up</a>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="hero-section">
+    <div class="hero-left">
+      <h1 class="hero-title">Your AI-Powered<br>Study Companion</h1>
+      <p class="hero-description">
+        Get instant summaries, clear explanations and practice MCQs on any topic.
+        Learn smarter, not harder.
+      </p>
+      <div class="cta-buttons">
+        <a href="signup.html" class="btn btn-primary">Get Started</a>
+        <a href="#features" class="btn btn-outline">Learn More</a>
+      </div>
+    </div>
+
+    <div class="hero-right" aria-hidden="true">
+      <img src="Chat bot-amico.svg" alt="AI Study Assistant illustration" class="hero-illustration"/>
+    </div>
+  </main>
+
+  <!-- ── Features Section ─────────────────────────────────────────────────── -->
+  <section id="features" class="features-section">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-badge">What We Offer</span>
+        <h2 class="section-title">Everything You Need to Study Smarter</h2>
+        <p class="section-subtitle">Powered by Google Gemini AI to help you understand any topic instantly.</p>
+      </div>
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-file-lines"></i></div>
+          <h3>AI Summaries</h3>
+          <p>Paste any topic or notes and get a concise, easy-to-read summary in seconds.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-lightbulb"></i></div>
+          <h3>Simple Explanations</h3>
+          <p>Complex concepts broken down into plain English so anyone can understand them.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <h3>Practice MCQs</h3>
+          <p>Generate 3–5 multiple choice questions on any topic to test your knowledge.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
+          <h3>File Upload</h3>
+          <p>Upload PDF, DOCX, or TXT files and let the AI analyse the content for you.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-comments"></i></div>
+          <h3>Chat History</h3>
+          <p>All your sessions are saved. Pin, rename, or delete chats whenever you like.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-lock"></i></div>
+          <h3>Secure & Private</h3>
+          <p>Your data is protected with JWT authentication and encrypted passwords.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── About Section ──────────────────────────────────────────────────────── -->
+  <section id="about" class="about-section">
+    <div class="section-container">
+      <div class="about-inner">
+
+        <div class="about-visual" aria-hidden="true">
+          <div class="about-icon-wrap">
+            <i class="fa-solid fa-graduation-cap" style="font-size: 5rem; color: #6c63ff;"></i>
+          </div>
+          <div class="about-stat-chips">
+            <span class="stat-chip"><i class="fa-solid fa-robot"></i> Gemini AI</span>
+            <span class="stat-chip"><i class="fa-solid fa-bolt"></i> Instant Results</span>
+            <span class="stat-chip"><i class="fa-solid fa-globe"></i> Runs on Localhost</span>
+          </div>
+        </div>
+
+        <div class="about-content">
+          <span class="section-badge">About the Project</span>
+          <h2 class="section-title" style="text-align:left; margin-top: 0.6rem;">Built for Students,<br>Powered by AI</h2>
+          <p class="about-text">
+            Smart Study Assistant is a web-based academic tool that helps students understand
+            any topic using Generative AI. Whether you need a quick summary before an exam,
+            a clear explanation of a difficult concept, or a set of practice questions — this
+            tool has you covered.
+          </p>
+          <p class="about-text">
+            Built with Node.js, MongoDB, and Google Gemini, the project demonstrates how
+            modern AI APIs can be integrated into a clean, modular web application that
+            runs entirely on your local machine.
+          </p>
+          <div class="about-tech">
+            <span class="tech-tag">HTML / CSS / JS</span>
+            <span class="tech-tag">Node.js</span>
+            <span class="tech-tag">MongoDB</span>
+            <span class="tech-tag">Google Gemini</span>
+            <span class="tech-tag">JWT Auth</span>
+          </div>
+          <a href="signup.html" class="btn btn-primary" style="margin-top: 1.8rem; display: inline-block;">Get Started Free</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+  <footer class="home-footer">
+    <div class="section-container">
+      <p>© 2026 Smart Study Assistant. Built using Google Gemini AI.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

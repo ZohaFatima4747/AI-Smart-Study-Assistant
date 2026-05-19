@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Smart Study Assistant</title>
+  <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+
+</head>
+<body class="auth-page-body">
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="fa-solid fa-graduation-cap" style="color: #6c63ff;"></i>
+        <span class="logo-text">Smart Study Assistant</span>
+      </div>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="login.html" class="nav-link">Login</a>
+        <a href="signup.html" class="nav-link active btn-signup">Sign Up</a>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="auth-container">
+    <div class="auth-card">
+
+      <div class="auth-header">
+        <div class="auth-logo">
+          <i class="fa-solid fa-graduation-cap" style="color: #6c63ff"></i>
+          <span class="auth-logo-text">Smart Study Assistant</span>
+        </div>
+        <p class="auth-subtitle">Create your account to get started</p>
+      </div>
+
+      <form id="signupForm" class="auth-form">
+
+        <div class="input-icon-group">
+          <i class="fa-solid fa-user input-icon" aria-hidden="true"></i>
+          <input type="text" id="name" name="name" required placeholder="Full Name" autocomplete="name">
+        </div>
+
+        <div class="input-icon-group">
+          <i class="fa-regular fa-envelope input-icon" aria-hidden="true"></i>
+          <input type="email" id="email" name="email" required placeholder="Email address" autocomplete="email">
+        </div>
+
+        <div class="input-icon-group">
+          <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
+          <input type="password" id="password" name="password" required placeholder="Password" autocomplete="new-password">
+          <button type="button" class="toggle-pw" aria-label="Toggle password visibility" data-target="password">
+            <i class="fa-regular fa-eye eye-icon"></i>
+          </button>
+        </div>
+
+        <div class="input-icon-group">
+          <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
+          <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm Password" autocomplete="new-password">
+          <button type="button" class="toggle-pw" aria-label="Toggle confirm password visibility" data-target="confirmPassword">
+            <i class="fa-regular fa-eye eye-icon"></i>
+          </button>
+        </div>
+
+        <div id="errorMessage" class="error-message" role="alert"></div>
+
+        <button type="submit" class="btn btn-primary btn-full">Sign Up</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="login.html">Login</a></p>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Smart Study Assistant</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+  </head>
+  <body class="auth-page-body">
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo">
+          <i class="fa-solid fa-graduation-cap" style="color: #6c63ff"></i>
+          <span class="logo-text">Smart Study Assistant</span>
+        </div>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="login.html" class="nav-link active">Login</a>
+          <a href="signup.html" class="nav-link btn-signup">Sign Up</a>
+        </div>
+        <button
+          class="nav-hamburger"
+          id="navHamburger"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+        >
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <main class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">
+            <i class="fa-solid fa-graduation-cap" style="color: #6c63ff"></i>
+            <span class="auth-logo-text">Smart Study Assistant</span>
+          </div>
+          <p class="auth-subtitle">
+            Welcome back! Please login to your account
+          </p>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <div class="input-icon-group">
+            <i class="fa-regular fa-envelope" style="color: #aaa;"   id="input-icon-envelope"></i>
+            </span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="Email address"
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="input-icon-group">
+            <i class="fa-solid fa-lock" style="color: #aaa;" id="input-icon-lock"></i>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              placeholder="Password"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-pw"
+              aria-label="Toggle password visibility"
+              data-target="password"
+            >
+              <i class="fa-regular fa-eye eye-icon"></i>
+            </button>
+          </div>
+
+          <div class="auth-options">
+            <label class="remember-label">
+              <input type="checkbox" id="remember" name="remember" />
+              <span>Remember me</span>
+            </label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <div id="errorMessage" class="error-message" role="alert"></div>
+
+          <button type="submit" class="btn btn-primary btn-full">Login</button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+        </div>
+      </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
