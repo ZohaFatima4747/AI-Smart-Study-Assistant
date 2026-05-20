@@ -1,0 +1,375 @@
+/* ── Basic reset ───────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+/* ── Home body ─────────────────────────────────────────────── */
+body.home-body {
+  background: #f0f0fa;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  align-items: center;
+}
+
+/* ── Navbar ───────────────────────────────────────────────── */
+.navbar {
+  background: #fff;
+  padding: 0 2rem;
+  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 68px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.logo .auth-brain-icon,
+.logo svg {
+  width: 34px;
+  height: 34px;
+}
+
+.logo-text {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+/* Nav links */
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #6c63ff;
+}
+
+/* Buttons */
+.btn-login-outline {
+  border: 1.5px solid #6c63ff !important;
+  color: #6c63ff !important;
+  padding: 0.4rem 1.2rem;
+  border-radius: 8px;
+}
+
+.btn-login-outline:hover {
+  background: #f0f0ff;
+}
+
+.btn-signup {
+  background: #6c63ff;
+  color: white !important;
+  padding: 0.4rem 1.2rem;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.btn-signup:hover {
+  background: #5a52e0;
+}
+
+/* Hamburger */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.nav-hamburger span {
+  width: 22px;
+  height: 2px;
+  background: #333;
+  border-radius: 2px;
+}
+
+/* ── Hero Section ─────────────────────────────────────────── */
+.hero-section {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 2rem 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+}
+
+.hero-left {
+  flex: 1;
+  max-width: 480px;
+}
+
+.hero-title {
+  font-size: 2.8rem;
+  font-weight: bold;
+  color: #1a1a2e;
+  line-height: 1.2;
+  margin-bottom: 1.4rem;
+}
+
+.hero-description {
+  font-size: 1.05rem;
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 2.2rem;
+  max-width: 400px;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hero-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-illustration {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn {
+  padding: 0.75rem 1.75rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: #6c63ff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5a52e0;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #1a1a2e;
+  border: 1.5px solid #ccc;
+}
+
+.btn-outline:hover {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+/* ── Section Shared ──────────────────────────────────────── */
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.section-badge {
+  display: inline-block;
+  background: #ededff;
+  color: #6c63ff;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1a1a2e;
+  margin-bottom: 0.75rem;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: #666;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ── Features ───────────────────────────────────────────── */
+.features-section {
+  background: #fff;
+  padding: 5rem 0;
+  width: 100%;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+.feature-card {
+  background: #f8f8ff;
+  border: 1px solid #e8eaf0;
+  border-radius: 14px;
+  padding: 2rem;
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.6rem;
+}
+
+.feature-card p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* ── About ─────────────────────────────────────────────── */
+.about-section {
+  background: #f5f5ff;
+  padding: 5rem 0;
+  width: 100%;
+}
+
+.about-inner {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+
+.about-icon-wrap {
+  background: #fff;
+  border-radius: 50%;
+  padding: 1.5rem;
+}
+
+.about-stat-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.stat-chip {
+  background: #fff;
+  border: 1px solid #dde0f8;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+}
+
+.about-text {
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.about-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tech-tag {
+  background: #ededff;
+  color: #6c63ff;
+  font-size: 0.82rem;
+  font-weight: bold;
+  padding: 0.35rem 0.9rem;
+  border-radius: 8px;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+.home-footer {
+  background: #1a1a2e;
+  color: #aaa;
+  text-align: center;
+  padding: 1.5rem 2rem;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .about-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-hamburger {
+    display: flex;
+  }
+
+  .nav-links {
+    display: none;
+  }
+}

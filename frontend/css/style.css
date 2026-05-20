@@ -113,7 +113,7 @@ body.home-body {
 /* Search icon inside sidebar search box */
 .sidebar-search .search-icon {
   font-size: 0.8rem;
-  color: #666;
+  color: #ffffff;
   position: absolute;
   left: 22px;
   top: 50%;
@@ -685,23 +685,23 @@ html.sidebar-init-collapsed .sidebar {
   left: 22px;
   top: 50%;
   transform: translateY(-60%);
-  color: #666;
+  color: #f5f3f3;
   pointer-events: none;
 }
 
 .sidebar-search input {
   width: 100%;
   background: #252540;
-  border: 1px solid #33335a;
+  border: 1px solid #f5f3f3;
   border-radius: 8px;
   padding: 8px 12px 8px 32px;
-  color: #ccc;
+  color: #f5f3f3;
   font-size: 0.83rem;
   outline: none;
 }
 
 .sidebar-search input::placeholder {
-  color: #666;
+  color: #f5f3f3;
 }
 
 .sidebar-search input:focus {
