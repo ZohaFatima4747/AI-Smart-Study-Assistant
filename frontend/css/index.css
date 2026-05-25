@@ -1,4 +1,4 @@
-/* ── Basic reset ───────────────────────────────────────────── */
+/* ── Reset ───────────────────────────────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
@@ -14,7 +14,7 @@ body {
   color: #333;
 }
 
-/* ── Home body ─────────────────────────────────────────────── */
+/* ── Home body ───────────────────────────────────────────────────────────── */
 body.home-body {
   background: #f0f0fa;
   display: flex;
@@ -23,7 +23,7 @@ body.home-body {
   align-items: center;
 }
 
-/* ── Navbar ───────────────────────────────────────────────── */
+/* ── Navbar ──────────────────────────────────────────────────────────────── */
 .navbar {
   background: #fff;
   padding: 0 2rem;
@@ -50,10 +50,8 @@ body.home-body {
   text-decoration: none;
 }
 
-.logo .auth-brain-icon,
-.logo svg {
-  width: 34px;
-  height: 34px;
+.logo > i {
+  font-size: 1.5rem;
 }
 
 .logo-text {
@@ -62,7 +60,6 @@ body.home-body {
   color: #1a1a2e;
 }
 
-/* Nav links */
 .nav-links {
   display: flex;
   gap: 1.5rem;
@@ -80,7 +77,6 @@ body.home-body {
   color: #6c63ff;
 }
 
-/* Buttons */
 .btn-login-outline {
   border: 1.5px solid #6c63ff !important;
   color: #6c63ff !important;
@@ -104,7 +100,7 @@ body.home-body {
   background: #5a52e0;
 }
 
-/* Hamburger */
+/* ── Hamburger ───────────────────────────────────────────────────────────── */
 .nav-hamburger {
   display: none;
   flex-direction: column;
@@ -117,14 +113,73 @@ body.home-body {
   border-radius: 6px;
 }
 
+.nav-hamburger:hover {
+  background: #f0f0ff;
+}
+
 .nav-hamburger span {
+  display: block;
   width: 22px;
   height: 2px;
   background: #333;
   border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  transform-origin: center;
 }
 
-/* ── Hero Section ─────────────────────────────────────────── */
+.nav-hamburger.is-open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-hamburger.is-open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.nav-hamburger.is-open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  padding: 0.75rem 1.75rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: #6c63ff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5a52e0;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #1a1a2e;
+  border: 1.5px solid #ccc;
+  padding: 0.75rem 1.75rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-outline:hover {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+/* ── Hero section ────────────────────────────────────────────────────────── */
 .hero-section {
   flex: 1;
   width: 100%;
@@ -162,6 +217,7 @@ body.home-body {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .hero-right {
@@ -174,41 +230,10 @@ body.home-body {
 .hero-illustration {
   width: 100%;
   max-width: 500px;
+  height: auto;
 }
 
-/* ── Buttons ─────────────────────────────────────────────── */
-.btn {
-  padding: 0.75rem 1.75rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.btn-primary {
-  background: #6c63ff;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #5a52e0;
-}
-
-.btn-outline {
-  background: transparent;
-  color: #1a1a2e;
-  border: 1.5px solid #ccc;
-}
-
-.btn-outline:hover {
-  border-color: #6c63ff;
-  color: #6c63ff;
-}
-
-/* ── Section Shared ──────────────────────────────────────── */
+/* ── Shared section layout ───────────────────────────────────────────────── */
 .section-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -228,13 +253,16 @@ body.home-body {
   font-weight: bold;
   padding: 0.35rem 1rem;
   border-radius: 20px;
+  letter-spacing: 0.04em;
   margin-bottom: 1rem;
+  text-transform: uppercase;
 }
 
 .section-title {
   font-size: 2rem;
   font-weight: bold;
   color: #1a1a2e;
+  line-height: 1.25;
   margin-bottom: 0.75rem;
 }
 
@@ -243,13 +271,14 @@ body.home-body {
   color: #666;
   max-width: 520px;
   margin: 0 auto;
+  line-height: 1.7;
 }
 
-/* ── Features ───────────────────────────────────────────── */
+/* ── Features section ────────────────────────────────────────────────────── */
 .features-section {
+  width: 100%;
   background: #fff;
   padding: 5rem 0;
-  width: 100%;
 }
 
 .features-grid {
@@ -262,7 +291,13 @@ body.home-body {
   background: #f8f8ff;
   border: 1px solid #e8eaf0;
   border-radius: 14px;
-  padding: 2rem;
+  padding: 2rem 1.75rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.feature-card:hover {
+  box-shadow: 0 6px 24px rgba(108, 99, 255, 0.1);
+  transform: translateY(-3px);
 }
 
 .feature-icon {
@@ -270,21 +305,29 @@ body.home-body {
   margin-bottom: 1rem;
 }
 
+.feature-icon i {
+  font-size: 2rem;
+  color: #6c63ff;
+}
+
 .feature-card h3 {
   font-size: 1.05rem;
+  font-weight: bold;
+  color: #1a1a2e;
   margin-bottom: 0.6rem;
 }
 
 .feature-card p {
   font-size: 0.9rem;
   color: #666;
+  line-height: 1.7;
 }
 
-/* ── About ─────────────────────────────────────────────── */
+/* ── About section ───────────────────────────────────────────────────────── */
 .about-section {
+  width: 100%;
   background: #f5f5ff;
   padding: 5rem 0;
-  width: 100%;
 }
 
 .about-inner {
@@ -293,10 +336,20 @@ body.home-body {
   gap: 4rem;
 }
 
+.about-visual {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
 .about-icon-wrap {
   background: #fff;
+  border: 1px solid #e0e0f8;
   border-radius: 50%;
   padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(108, 99, 255, 0.1);
 }
 
 .about-stat-chips {
@@ -309,12 +362,25 @@ body.home-body {
 .stat-chip {
   background: #fff;
   border: 1px solid #dde0f8;
+  color: #555;
+  font-size: 0.82rem;
   padding: 0.4rem 1rem;
   border-radius: 20px;
-  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.stat-chip i {
+  font-size: 0.8rem;
+  color: #6c63ff;
+  margin-right: 2px;
+}
+
+.about-content {
+  flex: 1;
 }
 
 .about-text {
+  font-size: 0.97rem;
   color: #555;
   line-height: 1.8;
   margin-bottom: 1rem;
@@ -324,6 +390,7 @@ body.home-body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
+  margin-top: 1.4rem;
 }
 
 .tech-tag {
@@ -335,41 +402,214 @@ body.home-body {
   border-radius: 8px;
 }
 
-/* ── Footer ─────────────────────────────────────────────── */
+/* ── Footer ──────────────────────────────────────────────────────────────── */
 .home-footer {
+  width: 100%;
   background: #1a1a2e;
   color: #aaa;
   text-align: center;
   padding: 1.5rem 2rem;
+  font-size: 0.875rem;
 }
 
-/* ── Responsive ─────────────────────────────────────────── */
+/* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .hero-title {
+    font-size: 2.2rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
-  .hero-section {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .about-inner {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
   .nav-hamburger {
     display: flex;
   }
 
   .nav-links {
     display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: 0.75rem 1.25rem 1.25rem;
+    border-top: 1px solid #eee;
+    gap: 0.2rem;
+    z-index: 99;
+  }
+
+  .nav-links.nav-open {
+    display: flex;
+  }
+
+  .nav-container {
+    position: relative;
+  }
+
+  .nav-link {
+    padding: 0.7rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    width: 100%;
+    color: #333;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    background: #f5f5ff;
+    color: #6c63ff;
+  }
+
+  .btn-login-outline {
+    border: 1.5px solid #6c63ff !important;
+    text-align: center;
+    margin-top: 0.25rem;
+    padding: 0.65rem 0.75rem !important;
+  }
+
+  .btn-signup {
+    text-align: center;
+    margin-top: 0.15rem;
+    padding: 0.65rem 0.75rem !important;
+  }
+
+  .hero-section {
+    flex-direction: column;
+    padding: 3rem 1.5rem 2.5rem;
+    text-align: center;
+    gap: 2rem;
+    max-width: 100%;
+  }
+
+  .hero-left {
+    max-width: 100%;
+  }
+
+  .hero-description {
+    max-width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .cta-buttons {
+    justify-content: center;
+  }
+
+  .hero-right {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .features-section,
+  .about-section {
+    padding: 3.5rem 0;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .about-inner {
+    flex-direction: column;
+    gap: 2.5rem;
+    text-align: center;
+  }
+
+  .about-content .section-title {
+    text-align: center !important;
+  }
+
+  .about-tech {
+    justify-content: center;
+  }
+
+  .about-content .btn {
+    display: block !important;
+    text-align: center;
+  }
+
+  .section-title {
+    font-size: 1.65rem;
+  }
+
+  .about-visual {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    width: 100%;
+  }
+
+  .about-stat-chips {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .nav-container {
+    height: 56px;
+  }
+
+  .nav-links {
+    top: 56px;
+  }
+
+  .logo-text {
+    font-size: 0.9rem;
+  }
+
+  .hero-title {
+    font-size: 1.7rem;
+  }
+
+  .hero-description {
+    font-size: 0.88rem;
+  }
+
+  .btn,
+  .btn-outline {
+    padding: 0.65rem 1.2rem;
+    font-size: 0.88rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .feature-card {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-title {
+    font-size: 1.45rem;
+  }
+
+  .navbar {
+    padding: 0 0.75rem;
+  }
+
+  .logo-text {
+    font-size: 0.82rem;
   }
 }

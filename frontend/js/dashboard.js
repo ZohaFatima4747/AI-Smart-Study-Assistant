@@ -930,6 +930,11 @@ function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
+// Threshold (chars) above which user text gets collapsed
+var MSG_COLLAPSE_THRESHOLD = 120;
+// Collapsed height in pixels (~3 lines at 0.93rem / 1.6 line-height ≈ 72px)
+var MSG_COLLAPSED_PX = 72;
+
 // Add a user message bubble to the chat
 function appendUserMessage(text, questionType, iso) {
   var modeLabel = {
@@ -939,15 +944,81 @@ function appendUserMessage(text, questionType, iso) {
     auto: '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto'
   };
   var label = modeLabel[questionType] || modeLabel['auto'];
+  var isLong = text.length > MSG_COLLAPSE_THRESHOLD;
 
   var wrap = document.createElement('div');
   wrap.className = 'message';
+
+  var msgUserHtml;
+  if (isLong) {
+    msgUserHtml =
+      '<div class="msg-user msg-user-collapsible">' +
+        '<div class="msg-user-text-wrap collapsed">' +
+          '<span class="msg-user-text">' + escapeHtml(text) + '</span>' +
+        '</div>' +
+        '<button class="msg-toggle-btn" type="button" aria-expanded="false">' +
+          '<span class="toggle-label">Show more</span>' +
+          '<i class="fa-solid fa-chevron-down toggle-icon"></i>' +
+        '</button>' +
+      '</div>';
+  } else {
+    msgUserHtml = '<div class="msg-user">' + escapeHtml(text) + '</div>';
+  }
+
   wrap.innerHTML =
     '<div class="msg-row-user">' +
-      '<div class="msg-user">' + escapeHtml(text) + '</div>' +
+      msgUserHtml +
       '<div class="user-avatar-bubble"><i class="fa-solid fa-user"></i></div>' +
     '</div>' +
     '<div class="msg-time">' + label + ' &nbsp;·&nbsp; ' + formatTime(iso) + '</div>';
+
+  if (isLong) {
+    var textWrap = wrap.querySelector('.msg-user-text-wrap');
+    var toggleBtn = wrap.querySelector('.msg-toggle-btn');
+
+    // After the element is in the DOM we can measure its real full height
+    document.getElementById('chatMessages').appendChild(wrap);
+
+    // Measure full height, then lock it to collapsed size
+    var fullHeight = textWrap.scrollHeight;
+
+    // If the content is actually short enough, don't bother collapsing
+    if (fullHeight <= MSG_COLLAPSED_PX + 10) {
+      textWrap.classList.remove('collapsed');
+      toggleBtn.style.display = 'none';
+      return;
+    }
+
+    // Set the collapsed height explicitly so the transition has a concrete value
+    textWrap.style.height = MSG_COLLAPSED_PX + 'px';
+
+    toggleBtn.addEventListener('click', function() {
+      var isCollapsed = toggleBtn.getAttribute('aria-expanded') === 'false';
+
+      if (isCollapsed) {
+        // Expand: animate to full height
+        textWrap.style.height = fullHeight + 'px';
+        textWrap.classList.remove('collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        toggleBtn.querySelector('.toggle-label').textContent = 'Show less';
+        toggleBtn.querySelector('.toggle-icon').style.transform = 'rotate(180deg)';
+      } else {
+        // Collapse: animate back to fixed height
+        textWrap.style.height = fullHeight + 'px'; // set explicit before animating down
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            textWrap.style.height = MSG_COLLAPSED_PX + 'px';
+            textWrap.classList.add('collapsed');
+          });
+        });
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.querySelector('.toggle-label').textContent = 'Show more';
+        toggleBtn.querySelector('.toggle-icon').style.transform = 'rotate(0deg)';
+      }
+    });
+
+    return; // already appended above
+  }
 
   document.getElementById('chatMessages').appendChild(wrap);
 }

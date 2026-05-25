@@ -57,42 +57,131 @@ var upload = multer({
   }
 });
 
-// Detect question type from the user's input text
+// Detect question type from the user's input text.
+// Returns 'mcq', 'explanation', 'summary', or null (unknown intent).
+// Explicit dropdown selection always overrides this — only called when questionType === 'auto'.
 function detectQuestionType(input) {
   var text = input.toLowerCase();
 
-  // MCQ keywords
-  if (/\b(mcq|mcqs|quiz|quizzes|multiple.?choice|test me|questions?|practice)\b/.test(text)) {
-    return 'mcq';
+  // Intent rules — ordered by specificity. Add new modes here as the app grows.
+  var intentRules = [
+    {
+      type: 'mcq',
+      pattern: /\b(mcq|mcqs|quiz|quizzes|multiple.?choice|test me|questions?|practice|give me questions?|generate questions?)\b/
+    },
+    {
+      type: 'explanation',
+      pattern: /\b(explain|explanation|what is|what are|how does|how do|why is|why does|describe|elaborate|clarify|break.?down|tell me about|define|definition|help me understand)\b/
+    },
+    {
+      type: 'summary',
+      pattern: /\b(summar|summarize|summarise|overview|brief|tldr|tl;dr|short|concise|gist|outline|recap|key points?|main points?)\b/
+    }
+  ];
+
+  for (var i = 0; i < intentRules.length; i++) {
+    if (intentRules[i].pattern.test(text)) {
+      return intentRules[i].type;
+    }
   }
 
-  // Explanation keywords
-  if (/\b(explain|explanation|what is|what are|how does|how do|why is|why does|describe|elaborate|clarify|break.?down|tell me about|define|definition)\b/.test(text)) {
-    return 'explanation';
-  }
-
-  // Summary keywords
-  if (/\b(summar|summarize|summarise|overview|brief|tldr|tl;dr|short|concise|gist|outline|recap)\b/.test(text)) {
-    return 'summary';
-  }
-
-  // Default to explanation for open-ended questions
-  return 'explanation';
+  // Intent unclear — fall back to summary as a safe default
+  return 'summary';
 }
 
-// Build the AI prompt based on what the user wants
-function buildPrompt(topic, type) {
+// Detect whether the user's message references prior conversation context.
+// Phrases like "this topic", "above", "same concept", "it", etc. signal that
+// the user expects the AI to use the existing conversation rather than treat
+// the message as a standalone query.
+function isContextualQuery(input) {
+  var text = input.toLowerCase();
+  return /\b(this topic|this concept|this chapter|this subject|this lesson|this content|this material|above (topic|discussion|content|explanation|summary|concept)|same topic|same concept|related to this|based on (this|above|that)|about (this|that|it)|on (this|that)|from (this|above)|the (above|previous|last|same)|it\b|that\b)/i.test(text);
+}
+
+// Build a conversation history block from prior messages (most recent last).
+// Each entry shows the user question and the AI response so Gemini has full context.
+function buildHistoryBlock(priorMessages) {
+  if (!priorMessages || priorMessages.length === 0) return '';
+
+  var lines = ['--- Conversation History (most recent last) ---'];
+  for (var i = 0; i < priorMessages.length; i++) {
+    var m = priorMessages[i];
+    if (m.ai_status !== 'success') continue;
+
+    lines.push('User: ' + m.user_question);
+
+    // For MCQ messages the ai_response is JSON — summarise it instead of dumping raw JSON
+    if (m.question_type === 'mcq') {
+      lines.push('Assistant: [Generated MCQs about the above topic]');
+    } else {
+      // Trim long responses so the prompt stays within token limits
+      var resp = (m.ai_response || '').substring(0, 600);
+      if (m.ai_response && m.ai_response.length > 600) resp += '...';
+      lines.push('Assistant: ' + resp);
+    }
+  }
+  lines.push('--- End of History ---');
+  return lines.join('\n');
+}
+
+// Build the AI prompt, optionally injecting conversation history for context.
+// priorMessages: array of ChatMessage docs (last N messages before this one), may be empty.
+function buildPrompt(userInput, type, priorMessages) {
+  var historyBlock = buildHistoryBlock(priorMessages);
+  var hasHistory = historyBlock.length > 0;
+
+  // When the user references prior context, instruct the AI to use it.
+  // When there is no prior context, fall back to treating the input as a standalone topic.
+  var contextInstruction = hasHistory
+    ? 'You are an educational AI assistant with memory of the current conversation.\n' +
+      'Use the conversation history below to understand what "this topic", "this concept", "above", etc. refer to.\n' +
+      'Always base your response on the most relevant topic from the conversation history when the user refers to it.\n\n' +
+      historyBlock + '\n\n'
+    : 'You are an educational AI assistant.\n\n';
+
+  var userLine = 'User request: "' + userInput + '"';
 
   if (type === 'summary') {
-    return 'You are an educational AI assistant. Provide a concise summary for the topic: "' + topic + '"\n\nRespond ONLY with valid JSON:\n{\n  "summary": "A clear 2-3 sentence summary of the topic"\n}';
+    return contextInstruction +
+      userLine + '\n\n' +
+      'Provide a concise summary (2-3 sentences) for the topic the user is asking about.\n' +
+      'Respond ONLY with valid JSON:\n' +
+      '{\n  "summary": "A clear 2-3 sentence summary"\n}';
   }
 
   if (type === 'explanation') {
-    return 'You are an educational AI assistant. Provide a detailed explanation for the topic: "' + topic + '"\n\nRespond ONLY with valid JSON:\n{\n  "explanation": "A detailed explanation in 3-4 paragraphs that breaks down the concept clearly"\n}';
+    return contextInstruction +
+      userLine + '\n\n' +
+      'Provide a detailed explanation (3-4 paragraphs) for the topic the user is asking about.\n' +
+      'Respond ONLY with valid JSON:\n' +
+      '{\n  "explanation": "A detailed explanation that breaks down the concept clearly"\n}';
   }
 
   // MCQ type
-  return 'You are an educational AI assistant. Generate MCQs for the topic: "' + topic + '"\n\nRespond ONLY with valid JSON:\n{\n  "mcqs": [\n    {\n      "question": "Question text here",\n      "options": ["Option A text", "Option B text", "Option C text", "Option D text"],\n      "correct_answer": "A"\n    },\n    {\n      "question": "Question text here",\n      "options": ["Option A text", "Option B text", "Option C text", "Option D text"],\n      "correct_answer": "B"\n    },\n    {\n      "question": "Question text here",\n      "options": ["Option A text", "Option B text", "Option C text", "Option D text"],\n      "correct_answer": "C"\n    }\n  ]\n}';
+  return contextInstruction +
+    userLine + '\n\n' +
+    'Generate 3 multiple-choice questions about the topic the user is asking about.\n' +
+    'Respond ONLY with valid JSON:\n' +
+    '{\n  "mcqs": [\n' +
+    '    {\n      "question": "Question text here",\n      "options": ["Option A text", "Option B text", "Option C text", "Option D text"],\n      "correct_answer": "A"\n    },\n' +
+    '    {\n      "question": "Question text here",\n      "options": ["Option A text", "Option B text", "Option C text", "Option D text"],\n      "correct_answer": "B"\n    },\n' +
+    '    {\n      "question": "Question text here",\n      "options": ["Option A text", "Option B text", "Option C text", "Option D text"],\n      "correct_answer": "C"\n    }\n' +
+    '  ]\n}';
+}
+
+// Fetch the last N successful messages from a session to use as context.
+// Returns a promise that resolves to an array of ChatMessage docs.
+function fetchRecentHistory(sessionId, limitCount) {
+  return ChatMessage.find({
+    session_id: sessionId,
+    ai_status: 'success'
+  })
+    .sort({ created_at: -1 })
+    .limit(limitCount)
+    .then(function(messages) {
+      // Reverse so oldest is first (chronological order for the prompt)
+      return messages.reverse();
+    });
 }
 
 // Models to try in order — primary first, fallback second
@@ -209,8 +298,14 @@ router.post('/generate', auth, aiRateLimit, function(req, res) {
     .then(function() {
       if (!sessionObj) return;
 
-      // Step 2: Call the Gemini AI API with retry + fallback
-      var prompt = buildPrompt(input.trim(), questionType);
+      // Step 2: Fetch recent conversation history for context (last 6 messages)
+      return fetchRecentHistory(sessionObj._id, 6);
+    })
+    .then(function(priorMessages) {
+      if (!sessionObj) return;
+
+      // Step 3: Call the Gemini AI API with context-aware prompt
+      var prompt = buildPrompt(input.trim(), questionType, priorMessages || []);
       return callGeminiWithRetry(prompt);
     })
     .then(function(result) {
@@ -585,8 +680,14 @@ router.post('/upload', auth, aiRateLimit, upload.single('file'), function(req, r
     .then(function() {
       if (!sessionObj) return;
 
-      // Step 3: Call the Gemini AI API with retry + fallback
-      var prompt = buildPrompt(extractedText, questionType);
+      // Step 3: Fetch recent conversation history for context (last 6 messages)
+      return fetchRecentHistory(sessionObj._id, 6);
+    })
+    .then(function(priorMessages) {
+      if (!sessionObj) return;
+
+      // Step 4: Call the Gemini AI API with context-aware prompt
+      var prompt = buildPrompt(extractedText, questionType, priorMessages || []);
       return callGeminiWithRetry(prompt);
     })
     .then(function(result) {
