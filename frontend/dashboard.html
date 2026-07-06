@@ -150,5 +150,22 @@
   </main>
 
   <script src="js/dashboard.js"></script>
+
+  <!-- Delete Chat Confirmation Modal -->
+  <div id="deleteChatModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-icon">
+        <i class="fa-solid fa-trash"></i>
+      </div>
+      <h2 class="modal-title" id="deleteModalTitle">Delete this chat?</h2>
+      <p class="modal-desc">This will permanently delete the conversation and all its messages. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" id="deleteModalCancel">Cancel</button>
+        <button class="modal-btn modal-btn-delete" id="deleteModalConfirm">
+          <i class="fa-solid fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

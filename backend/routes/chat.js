@@ -89,15 +89,6 @@ function detectQuestionType(input) {
   return 'summary';
 }
 
-// Detect whether the user's message references prior conversation context.
-// Phrases like "this topic", "above", "same concept", "it", etc. signal that
-// the user expects the AI to use the existing conversation rather than treat
-// the message as a standalone query.
-function isContextualQuery(input) {
-  var text = input.toLowerCase();
-  return /\b(this topic|this concept|this chapter|this subject|this lesson|this content|this material|above (topic|discussion|content|explanation|summary|concept)|same topic|same concept|related to this|based on (this|above|that)|about (this|that|it)|on (this|that)|from (this|above)|the (above|previous|last|same)|it\b|that\b)/i.test(text);
-}
-
 // Build a conversation history block from prior messages (most recent last).
 // Each entry shows the user question and the AI response so Gemini has full context.
 function buildHistoryBlock(priorMessages) {
@@ -185,7 +176,7 @@ function fetchRecentHistory(sessionId, limitCount) {
 }
 
 // Models to try in order — primary first, fallback second
-var AI_MODELS = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+var AI_MODELS = ['gemini-2.5-flash', 'gemini-1.5-flash-001'];
 
 // Wait for a given number of milliseconds
 function wait(ms) {
@@ -527,29 +518,6 @@ router.patch('/history/:id/rename', auth, function(req, res) {
     .catch(function(error) {
       console.log('Rename error:', error.message);
       res.status(500).json({ error: 'Could not rename session.' });
-    });
-});
-
-// ── PATCH /api/chat/history/:id/pin — toggle pin on a chat session ───────────
-router.patch('/history/:id/pin', auth, function(req, res) {
-
-  // First find the session so we know its current pin state
-  ChatSession.findOne({ _id: req.params.id, user_id: req.userId })
-    .then(function(session) {
-      if (!session) {
-        return res.status(404).json({ error: 'Session not found.' });
-      }
-
-      // Flip the pin state
-      session.is_pinned = !session.is_pinned;
-      return session.save();
-    })
-    .then(function(session) {
-      res.json({ session: session });
-    })
-    .catch(function(error) {
-      console.log('Pin error:', error.message);
-      res.status(500).json({ error: 'Could not update pin status.' });
     });
 });
 

@@ -156,6 +156,33 @@ document.addEventListener('DOMContentLoaded', function() {
   // New chat button
   document.getElementById('newChatBtn').addEventListener('click', startNewChat);
 
+  // Delete chat button — opens confirmation modal
+  document.getElementById('deleteChatBtn').addEventListener('click', function() {
+    if (!currentSessionId) return;
+    openDeleteModal(currentSessionId);
+  });
+
+  // Modal cancel
+  document.getElementById('deleteModalCancel').addEventListener('click', closeDeleteModal);
+
+  // Modal confirm delete
+  document.getElementById('deleteModalConfirm').addEventListener('click', function() {
+    var sessionToDelete = closeDeleteModal();
+    if (sessionToDelete) {
+      deleteSession(sessionToDelete);
+    }
+  });
+
+  // Close modal on overlay click
+  document.getElementById('deleteChatModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
+
   // Search box — filter the chat history list
   document.getElementById('searchInput').addEventListener('input', function(e) {
     var query = e.target.value.toLowerCase().trim();
@@ -443,7 +470,13 @@ function loadSession(sessionId) {
       for (var i = 0; i < data.messages.length; i++) {
         var msg = data.messages[i];
 
-        appendUserMessage(msg.user_question, msg.question_type, msg.created_at);
+        var isFileMsg = msg.source_type === 'file';
+        // Strip the emoji prefix saved by the backend before displaying
+        var displayQuestion = isFileMsg
+          ? msg.user_question.replace(/^📄\s*/, '')
+          : msg.user_question;
+
+        appendUserMessage(displayQuestion, msg.question_type, msg.created_at, isFileMsg);
 
         if (msg.ai_status === 'failed') {
           appendError('AI response failed for this message.');
@@ -494,11 +527,28 @@ function loadSession(sessionId) {
     });
 }
 
+// ── Delete confirmation modal ─────────────────────────────────────────────────
+var _pendingDeleteId = null;
+
+function openDeleteModal(sessionId) {
+  _pendingDeleteId = sessionId;
+  var modal = document.getElementById('deleteChatModal');
+  modal.style.display = 'flex';
+  // Focus the cancel button for keyboard accessibility
+  document.getElementById('deleteModalCancel').focus();
+}
+
+// Returns the session ID that was pending (so the caller can act on it), then clears state
+function closeDeleteModal() {
+  var pending = _pendingDeleteId;
+  _pendingDeleteId = null;
+  var modal = document.getElementById('deleteChatModal');
+  modal.style.display = 'none';
+  return pending;
+}
+
 // ── Delete a chat session ─────────────────────────────────────────────────────
 function deleteSession(sessionId) {
-  var confirmed = confirm('Delete this chat?');
-  if (!confirmed) return;
-
   fetch(API_URL + '/chat/history/' + sessionId, {
     method: 'DELETE',
     headers: { Authorization: 'Bearer ' + token }
@@ -586,7 +636,7 @@ function openContextMenu(btn, sessionId) {
 
   menu.querySelector('#menuDelete').addEventListener('click', function() {
     closeContextMenu();
-    deleteSession(sessionId);
+    openDeleteModal(sessionId);
   });
 
   // Close the menu if the user clicks somewhere else
@@ -846,7 +896,7 @@ function sendFile(file) {
   var uploadBtn = document.getElementById('uploadBtn');
 
   showChatArea();
-  appendUserMessage('<i class="fa-solid fa-file-pdf"></i> ' + file.name, questionType, new Date().toISOString());
+  appendUserMessage(file.name, questionType, new Date().toISOString(), true);
 
   // Clear the file input UI
   fileInput.value = '';
@@ -936,7 +986,7 @@ var MSG_COLLAPSE_THRESHOLD = 120;
 var MSG_COLLAPSED_PX = 72;
 
 // Add a user message bubble to the chat
-function appendUserMessage(text, questionType, iso) {
+function appendUserMessage(text, questionType, iso, isFile) {
   var modeLabel = {
     summary: '<i class="fa-solid fa-file-lines"></i> Summary',
     explanation: '<i class="fa-solid fa-lightbulb"></i> Explanation',
@@ -944,33 +994,55 @@ function appendUserMessage(text, questionType, iso) {
     auto: '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto'
   };
   var label = modeLabel[questionType] || modeLabel['auto'];
-  var isLong = text.length > MSG_COLLAPSE_THRESHOLD;
+
+  // For file messages the display text is short — never collapse them.
+  // For text messages check the threshold as usual.
+  var isLong = !isFile && text.length > MSG_COLLAPSE_THRESHOLD;
 
   var wrap = document.createElement('div');
   wrap.className = 'message';
 
-  var msgUserHtml;
+  // Build the inner content of the user bubble
+  var msgUserEl = document.createElement('div');
+
   if (isLong) {
-    msgUserHtml =
-      '<div class="msg-user msg-user-collapsible">' +
-        '<div class="msg-user-text-wrap collapsed">' +
-          '<span class="msg-user-text">' + escapeHtml(text) + '</span>' +
-        '</div>' +
-        '<button class="msg-toggle-btn" type="button" aria-expanded="false">' +
-          '<span class="toggle-label">Show more</span>' +
-          '<i class="fa-solid fa-chevron-down toggle-icon"></i>' +
-        '</button>' +
-      '</div>';
+    msgUserEl.className = 'msg-user msg-user-collapsible';
+    msgUserEl.innerHTML =
+      '<div class="msg-user-text-wrap collapsed">' +
+        '<span class="msg-user-text">' + escapeHtml(text) + '</span>' +
+      '</div>' +
+      '<button class="msg-toggle-btn" type="button" aria-expanded="false">' +
+        '<span class="toggle-label">Show more</span>' +
+        '<i class="fa-solid fa-chevron-down toggle-icon"></i>' +
+      '</button>';
+  } else if (isFile) {
+    // Render icon via DOM so Font Awesome loads it correctly — never use escapeHtml on icon HTML
+    msgUserEl.className = 'msg-user msg-user-file';
+    var iconEl = document.createElement('i');
+    iconEl.className = 'fa-solid fa-file-pdf';
+    iconEl.setAttribute('aria-hidden', 'true');
+    msgUserEl.appendChild(iconEl);
+    msgUserEl.appendChild(document.createTextNode(' ' + text));
   } else {
-    msgUserHtml = '<div class="msg-user">' + escapeHtml(text) + '</div>';
+    msgUserEl.className = 'msg-user';
+    msgUserEl.textContent = text;
   }
 
-  wrap.innerHTML =
-    '<div class="msg-row-user">' +
-      msgUserHtml +
-      '<div class="user-avatar-bubble"><i class="fa-solid fa-user"></i></div>' +
-    '</div>' +
-    '<div class="msg-time">' + label + ' &nbsp;·&nbsp; ' + formatTime(iso) + '</div>';
+  var avatarEl = document.createElement('div');
+  avatarEl.className = 'user-avatar-bubble';
+  avatarEl.innerHTML = '<i class="fa-solid fa-user"></i>';
+
+  var rowEl = document.createElement('div');
+  rowEl.className = 'msg-row-user';
+  rowEl.appendChild(msgUserEl);
+  rowEl.appendChild(avatarEl);
+
+  var timeEl = document.createElement('div');
+  timeEl.className = 'msg-time';
+  timeEl.innerHTML = label + ' &nbsp;·&nbsp; ' + formatTime(iso);
+
+  wrap.appendChild(rowEl);
+  wrap.appendChild(timeEl);
 
   if (isLong) {
     var textWrap = wrap.querySelector('.msg-user-text-wrap');

@@ -610,7 +610,22 @@ html.sidebar-init-collapsed .sidebar {
   text-align: left;
 }
 
-/* Collapsible long user messages */
+/* File upload user message */
+.msg-user.msg-user-file {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 65%;
+}
+
+.msg-user.msg-user-file i {
+  font-size: 0.95rem;
+  color: #6c63ff;
+  flex-shrink: 0;
+}
 .msg-user.msg-user-collapsible {
   display: flex;
   flex-direction: column;
@@ -1455,5 +1470,123 @@ html.sidebar-init-collapsed .sidebar {
 @media (max-width: 360px) {
   .send-btn {
     padding: 8px 10px;
+  }
+}
+
+/* ── Delete confirmation modal ───────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: modalFadeIn 0.18s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 2rem 1.75rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: modalSlideUp 0.2s ease;
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-icon {
+  width: 56px;
+  height: 56px;
+  background: #fff5f5;
+  border: 2px solid #fcc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.1rem;
+}
+
+.modal-icon i {
+  font-size: 1.3rem;
+  color: #e74c3c;
+}
+
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #1a1a2e;
+  margin-bottom: 0.55rem;
+}
+
+.modal-desc {
+  font-size: 0.88rem;
+  color: #777;
+  line-height: 1.6;
+  margin-bottom: 1.6rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 9px 24px;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.modal-btn:active {
+  transform: scale(0.97);
+}
+
+.modal-btn-cancel {
+  background: #f0f0f8;
+  color: #555;
+  flex: 1;
+}
+
+.modal-btn-cancel:hover {
+  background: #e4e4f0;
+}
+
+.modal-btn-delete {
+  background: #e74c3c;
+  color: #fff;
+  flex: 1;
+}
+
+.modal-btn-delete:hover {
+  background: #c0392b;
+}
+
+@media (max-width: 480px) {
+  .modal-box {
+    padding: 1.5rem 1.25rem 1.35rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
   }
 }

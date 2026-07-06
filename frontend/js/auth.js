@@ -80,7 +80,7 @@ if (signupForm) {
           errorMessage.classList.add('show');
         }
       })
-      .catch(function(error) {
+      .catch(function() {
         errorMessage.textContent = 'Network error. Please check your connection.';
         errorMessage.classList.add('show');
       });
@@ -121,7 +121,7 @@ if (loginForm) {
           errorMessage.classList.add('show');
         }
       })
-      .catch(function(error) {
+      .catch(function() {
         errorMessage.textContent = 'Network error. Please check your connection.';
         errorMessage.classList.add('show');
       });
