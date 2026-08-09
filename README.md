@@ -505,7 +505,6 @@ The AI maintains short-term memory within each session. Before every request, th
 ## 👩‍💻 Developer
 
 **Created by:** Zoha Fatima
-**Role:** Full Stack Web Developer / AI Integration
 
 ---
 

@@ -18,7 +18,7 @@ const chatMessageSchema = new mongoose.Schema({
   },
   question_type: {
     type: String,
-    enum: ['summary', 'explanation', 'mcq'],
+    enum: ['summary', 'explanation', 'mcq', 'solve', 'extract'],
     required: true
   },
   // 'text' = typed input, 'file' = uploaded PDF/TXT/MD
@@ -43,7 +43,7 @@ const chatMessageSchema = new mongoose.Schema({
   },
   response_type: {
     type: String,
-    enum: ['summary', 'explanation', 'mcq'],
+    enum: ['summary', 'explanation', 'mcq', 'solve', 'extract'],
     required: true
   },
   ai_status: {

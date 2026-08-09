@@ -613,18 +613,50 @@ html.sidebar-init-collapsed .sidebar {
 /* File upload user message */
 .msg-user.msg-user-file {
   display: flex;
-  align-items: center;
-  gap: 7px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
   max-width: 65%;
 }
 
-.msg-user.msg-user-file i {
-  font-size: 0.95rem;
+/* Instruction text shown above the file pill */
+.msg-user-instruction {
+  font-size: 0.93rem;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* File name pill inside the file bubble */
+.file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(108, 99, 255, 0.12);
+  border: 1px solid rgba(108, 99, 255, 0.35);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.file-pill i {
+  font-size: 0.9rem;
   color: #6c63ff;
   flex-shrink: 0;
+}
+
+/* Extracted question type badge */
+.extracted-q-type {
+  font-size: 0.75rem;
+  color: #6c63ff;
+  font-weight: 600;
+  margin-left: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 .msg-user.msg-user-collapsible {
   display: flex;
@@ -1589,4 +1621,44 @@ html.sidebar-init-collapsed .sidebar {
   .modal-actions {
     flex-direction: column;
   }
+}
+
+/* Solved questions styles */
+.solved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.solved-item {
+  border-left: 3px solid #6c63ff;
+  padding: 10px 14px;
+  background: #f5f5ff;
+  border-radius: 0 8px 8px 0;
+}
+
+.solved-question {
+  font-weight: bold;
+  color: #1a1a2e;
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+}
+
+.solved-q-label {
+  color: #6c63ff;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.solved-answer {
+  color: #2d6a4f;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.solved-a-label {
+  font-weight: 700;
+  color: #27ae60;
+  margin-right: 4px;
 }

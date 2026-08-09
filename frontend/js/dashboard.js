@@ -14,6 +14,7 @@ if (!token) {
 var currentSessionId = null;
 var allSessions = [];
 var isSending = false;
+var currentFile = null; // Track the currently attached file
 
 // Sidebar references — set on DOMContentLoaded, used by loadSession
 var _sidebar = null;
@@ -271,14 +272,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   fileInput.addEventListener('change', function() {
     if (fileInput.files && fileInput.files[0]) {
-      var fileName = fileInput.files[0].name;
-      filePreviewName.textContent = fileName;
+      currentFile = fileInput.files[0];
+      filePreviewName.textContent = currentFile.name;
       filePreview.style.display = 'flex';
       uploadBtn.classList.add('upload-btn-active');
     }
   });
 
   fileClearBtn.addEventListener('click', function() {
+    currentFile = null;
     fileInput.value = '';
     filePreview.style.display = 'none';
     uploadBtn.classList.remove('upload-btn-active');
@@ -426,6 +428,7 @@ function renderHistory(sessions) {
 // ── Start a new empty chat ────────────────────────────────────────────────────
 function startNewChat() {
   currentSessionId = null;
+  currentFile = null;
 
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('topicInput').value = '';
@@ -434,6 +437,14 @@ function startNewChat() {
   document.getElementById('welcomeScreen').style.display = 'flex';
   document.getElementById('chatHeaderTitle').textContent = 'Smart Study Assistant';
   document.getElementById('deleteChatBtn').style.display = 'none';
+
+  // Also reset the file preview UI in case a file was staged
+  var fileInput = document.getElementById('fileInput');
+  var filePreview = document.getElementById('filePreview');
+  var uploadBtn = document.getElementById('uploadBtn');
+  if (fileInput) fileInput.value = '';
+  if (filePreview) filePreview.style.display = 'none';
+  if (uploadBtn) uploadBtn.classList.remove('upload-btn-active');
 
   // Remove the active highlight from all sidebar items
   var items = document.querySelectorAll('.history-item');
@@ -471,15 +482,26 @@ function loadSession(sessionId) {
         var msg = data.messages[i];
 
         var isFileMsg = msg.source_type === 'file';
-        // Strip the emoji prefix saved by the backend before displaying
-        var displayQuestion = isFileMsg
-          ? msg.user_question.replace(/^📄\s*/, '')
-          : msg.user_question;
+        // For file messages, extract the instruction part (before the \n📄 separator)
+        var displayInstruction = '';
+        var displayFileName = msg.user_question;
+        if (isFileMsg) {
+          // user_question is stored as "instruction\n📄 filename" or just "📄 filename"
+          var rawQ = msg.user_question.replace(/^📄\s*/, '');
+          var splitIdx = rawQ.indexOf('\n📄 ');
+          if (splitIdx !== -1) {
+            displayInstruction = rawQ.substring(0, splitIdx);
+            displayFileName = rawQ.substring(splitIdx + 4); // skip '\n📄 '
+          } else {
+            displayFileName = rawQ;
+          }
+        }
+        var displayQuestion = isFileMsg ? displayFileName : msg.user_question;
 
-        appendUserMessage(displayQuestion, msg.question_type, msg.created_at, isFileMsg);
+        appendUserMessage(displayQuestion, msg.question_type, msg.created_at, isFileMsg, displayInstruction || '');
 
         if (msg.ai_status === 'failed') {
-          appendError('AI response failed for this message.');
+          appendError('⚠️ AI response unavailable. Please try again in a moment.');
           continue;
         }
 
@@ -498,6 +520,18 @@ function loadSession(sessionId) {
             }
           }
           appendAIResponse({ questionType: 'mcq', mcqs: msgMcqs }, msg.created_at);
+
+        } else if (msg.question_type === 'solve') {
+          // Parse the stored JSON array of solved questions
+          var solvedQs = [];
+          try { solvedQs = JSON.parse(msg.ai_response); } catch (e) { solvedQs = []; }
+          appendAIResponse({ questionType: 'solve', solvedQuestions: solvedQs }, msg.created_at);
+
+        } else if (msg.question_type === 'extract') {
+          // Parse the stored JSON array of extracted questions
+          var extractedQs = [];
+          try { extractedQs = JSON.parse(msg.ai_response); } catch (e) { extractedQs = []; }
+          appendAIResponse({ questionType: 'extract', extractedQuestions: extractedQs }, msg.created_at);
 
         } else if (msg.question_type === 'summary') {
           appendAIResponse({ questionType: 'summary', summary: msg.ai_response }, msg.created_at);
@@ -797,8 +831,7 @@ function sendMessage() {
   // Prevent duplicate calls from button click + Enter key firing together
   if (isSending) return;
 
-  var fileInput = document.getElementById('fileInput');
-  var hasFile = fileInput && fileInput.files && fileInput.files[0];
+  var hasFile = !!currentFile;
 
   // Validate before proceeding
   if (!validateInput(hasFile)) return;
@@ -807,11 +840,14 @@ function sendMessage() {
 
   // If a file is attached, use the file upload flow instead
   if (hasFile) {
-    sendFile(fileInput.files[0]);
+    sendFile(currentFile);
     return;
   }
 
   var input = document.getElementById('topicInput').value.trim();
+  // The backend now determines intent from the message itself via Gemini.
+  // We still read the dropdown value so the user bubble can show a hint label
+  // before the response arrives, but the backend ignores it.
   var questionType = document.getElementById('questionType').value || 'auto';
 
   showChatArea();
@@ -831,7 +867,7 @@ function sendMessage() {
       'Content-Type': 'application/json',
       Authorization: 'Bearer ' + token
     },
-    body: JSON.stringify({ input: input, sessionId: currentSessionId, questionType: questionType })
+    body: JSON.stringify({ input: input, sessionId: currentSessionId })
   })
     .then(function(res) {
       loadingEl.remove();
@@ -849,13 +885,21 @@ function sendMessage() {
           loadHistory();
         }
 
-        // If type was auto-detected, update the user message label
-        if (questionType === 'auto' && result.data.questionType) {
+        // Always update the user message label with the actual detected intent
+        if (result.data.questionType) {
           var lastUserTime = document.querySelector('.msg-time:last-of-type');
           if (lastUserTime) {
-            var modeLabel = { summary: '<i class="fa-solid fa-file-lines"></i> Summary', explanation: '<i class="fa-solid fa-lightbulb"></i> Explanation', mcq: '<i class="fa-solid fa-circle-check"></i> MCQs' };
-            var detectedLabel = modeLabel[result.data.questionType] || '';
-            lastUserTime.innerHTML = detectedLabel + ' &nbsp;·&nbsp; ' + lastUserTime.innerHTML.split('·')[1];
+            var modeLabel = {
+              summary:     '<i class="fa-solid fa-file-lines"></i> Summary',
+              explanation: '<i class="fa-solid fa-lightbulb"></i> Explanation',
+              mcq:         '<i class="fa-solid fa-circle-check"></i> MCQs',
+              solve:       '<i class="fa-solid fa-pen-to-square"></i> Solve',
+              extract:     '<i class="fa-solid fa-list-ul"></i> Extract'
+            };
+            var detectedLabel = modeLabel[result.data.questionType] || '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto';
+            var parts = lastUserTime.innerHTML.split('·');
+            var timePart = parts.length > 1 ? parts[parts.length - 1] : lastUserTime.innerHTML;
+            lastUserTime.innerHTML = detectedLabel + ' &nbsp;·&nbsp; ' + timePart.trim();
           }
         }
 
@@ -871,15 +915,13 @@ function sendMessage() {
           }
         }
 
-      } else if (result.status === 429) {
-        appendError(result.data.error || 'Rate limit reached. Please wait and try again.');
       } else {
-        appendError(result.data.error || 'Failed to generate response. Please try again.');
+        appendError('⚠️ AI response unavailable. Please try again in a moment.');
       }
     })
     .catch(function(err) {
       loadingEl.remove();
-      appendError('Network error. Please check your connection and make sure the server is running.');
+      appendError('⚠️ AI response unavailable. Please try again in a moment.');
     })
     .finally(function() {
       isSending = false;
@@ -891,14 +933,20 @@ function sendMessage() {
 // ── Send a file to the server ─────────────────────────────────────────────────
 function sendFile(file) {
   var questionType = document.getElementById('questionType').value || 'auto';
+  var userInstruction = document.getElementById('topicInput').value.trim();
   var fileInput = document.getElementById('fileInput');
   var filePreview = document.getElementById('filePreview');
   var uploadBtn = document.getElementById('uploadBtn');
 
   showChatArea();
-  appendUserMessage(file.name, questionType, new Date().toISOString(), true);
+  // Show the file name AND the user's instruction as the message bubble
+  var displayMsg = userInstruction ? userInstruction + '\n📄 ' + file.name : file.name;
+  appendUserMessage(file.name, questionType, new Date().toISOString(), true, userInstruction);
 
-  // Clear the file input UI
+  // Clear the module-level file reference and input UI
+  currentFile = null;
+  document.getElementById('topicInput').value = '';
+  autoResize(document.getElementById('topicInput'));
   fileInput.value = '';
   filePreview.style.display = 'none';
   uploadBtn.classList.remove('upload-btn-active');
@@ -912,6 +960,7 @@ function sendFile(file) {
   var formData = new FormData();
   formData.append('file', file);
   formData.append('questionType', questionType);
+  formData.append('userInstruction', userInstruction || '');
   if (currentSessionId) {
     formData.append('sessionId', currentSessionId);
   }
@@ -937,6 +986,24 @@ function sendFile(file) {
           loadHistory();
         }
 
+        // Update the user bubble label with the actual detected intent
+        if (result.data.questionType) {
+          var lastUserTime = document.querySelector('.msg-time:last-of-type');
+          if (lastUserTime) {
+            var modeLabel = {
+              summary:     '<i class="fa-solid fa-file-lines"></i> Summary',
+              explanation: '<i class="fa-solid fa-lightbulb"></i> Explanation',
+              mcq:         '<i class="fa-solid fa-circle-check"></i> MCQs',
+              solve:       '<i class="fa-solid fa-pen-to-square"></i> Solve',
+              extract:     '<i class="fa-solid fa-list-ul"></i> Extract'
+            };
+            var detectedLabel = modeLabel[result.data.questionType] || '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto';
+            var parts = lastUserTime.innerHTML.split('·');
+            var timePart = parts.length > 1 ? parts[parts.length - 1] : lastUserTime.innerHTML;
+            lastUserTime.innerHTML = detectedLabel + ' &nbsp;·&nbsp; ' + timePart.trim();
+          }
+        }
+
         appendAIResponse(result.data, new Date().toISOString());
 
         // Highlight the active session in the sidebar
@@ -949,15 +1016,13 @@ function sendFile(file) {
           }
         }
 
-      } else if (result.status === 429) {
-        appendError(result.data.error || 'Rate limit reached. Please wait and try again.');
       } else {
-        appendError(result.data.error || 'Failed to process file. Please try again.');
+        appendError('⚠️ AI response unavailable. Please try again in a moment.');
       }
     })
     .catch(function(err) {
       loadingEl.remove();
-      appendError('Network error. Please check your connection and make sure the server is running.');
+      appendError('⚠️ AI response unavailable. Please try again in a moment.');
     })
     .finally(function() {
       isSending = false;
@@ -986,12 +1051,14 @@ var MSG_COLLAPSE_THRESHOLD = 120;
 var MSG_COLLAPSED_PX = 72;
 
 // Add a user message bubble to the chat
-function appendUserMessage(text, questionType, iso, isFile) {
+function appendUserMessage(text, questionType, iso, isFile, fileInstruction) {
   var modeLabel = {
     summary: '<i class="fa-solid fa-file-lines"></i> Summary',
     explanation: '<i class="fa-solid fa-lightbulb"></i> Explanation',
     mcq: '<i class="fa-solid fa-circle-check"></i> MCQs',
-    auto: '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto'
+    auto: '<i class="fa-solid fa-wand-magic-sparkles"></i> Auto',
+    solve: '<i class="fa-solid fa-pen-to-square"></i> Solve',
+    extract: '<i class="fa-solid fa-list-ul"></i> Extract'
   };
   var label = modeLabel[questionType] || modeLabel['auto'];
 
@@ -1016,13 +1083,22 @@ function appendUserMessage(text, questionType, iso, isFile) {
         '<i class="fa-solid fa-chevron-down toggle-icon"></i>' +
       '</button>';
   } else if (isFile) {
-    // Render icon via DOM so Font Awesome loads it correctly — never use escapeHtml on icon HTML
+    // Show the user's instruction (if any) above the file pill
     msgUserEl.className = 'msg-user msg-user-file';
+    if (fileInstruction) {
+      var instrEl = document.createElement('div');
+      instrEl.className = 'msg-user-instruction';
+      instrEl.textContent = fileInstruction;
+      msgUserEl.appendChild(instrEl);
+    }
+    var filePill = document.createElement('div');
+    filePill.className = 'file-pill';
     var iconEl = document.createElement('i');
     iconEl.className = 'fa-solid fa-file-pdf';
     iconEl.setAttribute('aria-hidden', 'true');
-    msgUserEl.appendChild(iconEl);
-    msgUserEl.appendChild(document.createTextNode(' ' + text));
+    filePill.appendChild(iconEl);
+    filePill.appendChild(document.createTextNode(' ' + text));
+    msgUserEl.appendChild(filePill);
   } else {
     msgUserEl.className = 'msg-user';
     msgUserEl.textContent = text;
@@ -1110,6 +1186,33 @@ function appendAIResponse(data, iso) {
       bodyHtml += '<p>' + escapeHtml(paragraphs[i].trim()) + '</p>';
     }
 
+  } else if (questionType === 'extract' && data.extractedQuestions && data.extractedQuestions.length > 0) {
+    // Render extracted questions list
+    var extractItems = '';
+    for (var ei = 0; ei < data.extractedQuestions.length; ei++) {
+      var eq = data.extractedQuestions[ei];
+      var qNum = eq.number || (ei + 1);
+      var qType = eq.type ? ' <span class="extracted-q-type">[' + escapeHtml(eq.type) + ']</span>' : '';
+      extractItems +=
+        '<div class="solved-item">' +
+          '<div class="solved-question"><span class="solved-q-label">Q' + qNum + '.</span> ' + escapeHtml(eq.question) + qType + '</div>' +
+        '</div>';
+    }
+    bodyHtml = '<div class="solved-list">' + extractItems + '</div>';
+
+  } else if (questionType === 'solve' && data.solvedQuestions && data.solvedQuestions.length > 0) {
+    // Render each solved question with its answer
+    var solvedItems = '';
+    for (var si = 0; si < data.solvedQuestions.length; si++) {
+      var sq = data.solvedQuestions[si];
+      solvedItems +=
+        '<div class="solved-item">' +
+          '<div class="solved-question"><span class="solved-q-label">Q' + (si + 1) + '.</span> ' + escapeHtml(sq.question) + '</div>' +
+          '<div class="solved-answer"><span class="solved-a-label">Ans:</span> ' + escapeHtml(sq.answer) + '</div>' +
+        '</div>';
+    }
+    bodyHtml = '<div class="solved-list">' + solvedItems + '</div>';
+
   } else if (questionType === 'mcq' && data.mcqs && data.mcqs.length > 0) {
     // Build the MCQ list
     var mcqItems = '';
@@ -1146,6 +1249,18 @@ function appendAIResponse(data, iso) {
 
   var msgEl = document.createElement('div');
   msgEl.className = 'message';
+
+  // If no content was produced (empty arrays, missing keys), show a friendly fallback
+  if (!bodyHtml) {
+    if (questionType === 'solve') {
+      bodyHtml = '<p><em>No questions were found in this document to solve. Try uploading a paper that contains numbered questions.</em></p>';
+    } else if (questionType === 'extract') {
+      bodyHtml = '<p><em>No questions were found in this document. The file may not contain recognisable question text.</em></p>';
+    } else {
+      bodyHtml = '<p><em>No response was generated. Please try again.</em></p>';
+    }
+  }
+
   msgEl.innerHTML =
     '<div class="msg-row-ai">' +
       '<div class="ai-avatar-bubble"><i class="fa-solid fa-brain"></i></div>' +
