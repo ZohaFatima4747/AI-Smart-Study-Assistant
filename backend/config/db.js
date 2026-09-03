@@ -1,15 +1,19 @@
-var mongoose = require('mongoose');
+var mongoose = require("mongoose");
 
 // This function connects our app to MongoDB
-function connectDB() {
-  mongoose.connect(process.env.MONGO_ATLAS_URI)
-    .then(function() {
-      console.log('MongoDB connected successfully');
-    })
-    .catch(function(error) {
-      console.log('MongoDB connection failed:', error.message);
-      process.exit(1); // Stop the app if the database fails to connect
-    });
+async function connectDB() {
+  var uri = process.env.MONGO_ATLAS_URI || process.env.MONGODB_URI;
+
+  if (!uri) {
+    throw new Error("Set MONGO_ATLAS_URI (or MONGODB_URI) in backend/.env");
+  }
+
+  await mongoose.connect(uri, {
+    // Fail quickly and show a useful startup error when Atlas is unreachable.
+    serverSelectionTimeoutMS: 10000,
+  });
+
+  console.log("MongoDB connected successfully");
 }
 
 module.exports = connectDB;
